@@ -1,0 +1,44 @@
+services:
+  rag-simple:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-simple
+    ports:
+      - "7860:7860"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      # Persistência LOCAL - dados visíveis no projeto
+      - ./data/documents:/app/data/documents
+      - ./data/faiss_index:/app/data/faiss_index
+      # Acesso a drives externos (descomente e ajuste conforme necessário)
+      # - G:/:/mnt/g:ro
+      # - //servidor/pasta:/mnt/rede:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Opcional: Serviço para desenvolvimento
+  rag-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-dev
+    ports:
+      - "7861:7860"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      # Persistência LOCAL - dados visíveis no projeto
+      - ./data/documents:/app/data/documents
+      - ./data/faiss_index:/app/data/faiss_index
+    profiles:
+      - dev
+    restart: unless-stopped

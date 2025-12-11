@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Ambiente
+.env
+.env.local
+.venv/
+venv/
+env/
+ENV/
+
+# Dados - Não versionar índices e documentos
+data/documents/*
+data/faiss_index/*
+data/faiss_index/*/
+!data/documents/.gitkeep
+!data/faiss_index/.gitkeep
+
+# Backups
+backup_*
+*_backup/
+faiss_backup_*
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore
+
+# Testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporários
+*.tmp
+*.bak
+temp/
+
+# Scripts de teste
+test_api_keys.py

@@ -1,0 +1,95 @@
+"""Embeddings Manager - Wrapper para geração de embeddings."""
+
+import os
+from typing import List, Optional
+
+import toml
+from langchain_openai import OpenAIEmbeddings
+from langchain_core.embeddings import Embeddings
+
+
+class EmbeddingsManager:
+    """Gerencia a geração de embeddings para documentos e queries."""
+
+    def __init__(
+        self,
+        provider: str = "openai",
+        model: str = "text-embedding-3-small",
+        api_key: Optional[str] = None,
+    ):
+        """
+        Inicializa o gerenciador de embeddings.
+
+        Args:
+            provider: Provedor de embeddings ("openai")
+            model: Nome do modelo de embeddings
+            api_key: API key (opcional, usa variável de ambiente se não fornecida)
+        """
+        self.provider = provider
+        self.model = model
+
+        # Usa API key fornecida ou busca do ambiente
+        resolved_key = api_key or os.getenv("OPENAI_API_KEY")
+
+        if provider == "openai":
+            self._embeddings = OpenAIEmbeddings(
+                model=model,
+                api_key=resolved_key,
+            )
+        else:
+            raise ValueError(f"Provedor não suportado: {provider}")
+
+    @classmethod
+    def from_config(cls, config_path: str = "config.toml") -> "EmbeddingsManager":
+        """
+        Cria EmbeddingsManager a partir de arquivo de configuração TOML.
+
+        Args:
+            config_path: Caminho para o arquivo config.toml
+
+        Returns:
+            Instância configurada do EmbeddingsManager
+        """
+        config = toml.load(config_path)
+        embeddings_config = config.get("embeddings", {})
+
+        return cls(
+            provider=embeddings_config.get("provider", "openai"),
+            model=embeddings_config.get("model", "text-embedding-3-small"),
+        )
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """
+        Gera embeddings para uma lista de textos.
+
+        Args:
+            texts: Lista de textos para gerar embeddings
+
+        Returns:
+            Lista de vetores de embeddings
+        """
+        return self._embeddings.embed_documents(texts)
+
+    def embed_query(self, text: str) -> List[float]:
+        """
+        Gera embedding para uma query.
+
+        Args:
+            text: Texto da query
+
+        Returns:
+            Vetor de embedding
+        """
+        return self._embeddings.embed_query(text)
+
+    @property
+    def embeddings(self) -> Embeddings:
+        """Retorna o objeto de embeddings do LangChain."""
+        return self._embeddings
+
+    def get_info(self) -> dict:
+        """Retorna informações sobre o modelo de embeddings."""
+        return {
+            "provider": self.provider,
+            "model": self.model,
+        }

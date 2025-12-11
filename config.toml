@@ -1,0 +1,33 @@
+[chunking]
+chunk_size = 512
+chunk_overlap = 50
+separators = ["\n\n", "\n", ". ", " ", ""]
+
+[retrieval]
+# Mais documentos = mais contexto para respostas elaboradas
+top_k = 8
+score_threshold = 0.7
+
+[llm.openai]
+model = "gpt-4o"
+# Temperatura mais alta para respostas mais naturais e elaboradas
+temperature = 0.3
+# Mais tokens para respostas completas
+max_tokens = 4096
+
+[llm.anthropic]
+model = "claude-sonnet-4-20250514"
+temperature = 0.3
+max_tokens = 4096
+
+[embeddings]
+provider = "openai"
+model = "text-embedding-3-small"
+
+[paths]
+documents_dir = "data/documents"
+faiss_index_dir = "data/faiss_index"
+
+# Configuração do prompt do sistema (personalizável)
+[prompt]
+system_context = "documentos de condomínio, regulamentos, convenções e assuntos relacionados"
