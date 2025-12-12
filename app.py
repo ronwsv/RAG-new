@@ -262,11 +262,15 @@ def _process_single_file_in_context(docs: list, file_name: str, context_name: st
     state.indexed_files = all_files
 
 
-def index_documents(files, embeddings_choice: str = "Ollama BGE-M3 (Local)") -> str:
+def index_documents(files, embeddings_choice: str = None) -> str:
     """Indexa documentos no contexto atual."""
     if not files:
         return "❌ Nenhum arquivo selecionado."
 
+    # Usa Ollama como padrão se nada for selecionado (grátis)
+    if not embeddings_choice:
+        embeddings_choice = "Ollama BGE-M3 (Local - Grátis)"
+    
     # Atualiza provider de embeddings
     provider = "ollama" if "Ollama" in embeddings_choice else "openai"
     if provider != state.embeddings.provider:
@@ -323,10 +327,14 @@ def index_documents(files, embeddings_choice: str = "Ollama BGE-M3 (Local)") -> 
     return "\n".join(report)
 
 
-def index_directory(folder_path: str, recursive: bool = True, embeddings_choice: str = "Ollama BGE-M3 (Local)") -> str:
+def index_directory(folder_path: str, recursive: bool = True, embeddings_choice: str = None) -> str:
     """Indexa todos os documentos de uma pasta no contexto atual."""
     if not folder_path or not folder_path.strip():
         return "❌ Por favor, informe o caminho da pasta."
+    
+    # Usa Ollama como padrão se nada for selecionado (grátis)
+    if not embeddings_choice:
+        embeddings_choice = "Ollama BGE-M3 (Local - Grátis)"
     
     # Atualiza provider de embeddings
     provider = "ollama" if "Ollama" in embeddings_choice else "openai"
@@ -558,18 +566,21 @@ with gr.Blocks(
             query_context_label = gr.Markdown(get_current_context_label())
 
             with gr.Row():
-                llm_choice = gr.Radio(
+                llm_choice = gr.Dropdown(
                     choices=["GPT-4o (OpenAI)", "Claude Sonnet (Anthropic)"],
                     value="GPT-4o (OpenAI)",
-                    label="Modelo LLM",
+                    label="Modelo LLM (Consulta)",
                     scale=1,
+                    interactive=True,
+                    allow_custom_value=False,
                 )
                 embeddings_choice = gr.Dropdown(
                     choices=["Ollama BGE-M3 (Local - Grátis)", "OpenAI text-embedding-3-small (Pago)"],
-                    value="Ollama BGE-M3 (Local - Grátis)",
-                    label="Modelo de Embeddings",
+                    value=None,
+                    label="Modelo de Embeddings (Indexação) - Padrão: Ollama Grátis",
                     scale=1,
                     interactive=True,
+                    allow_custom_value=False,
                 )
 
             question_input = gr.Textbox(
