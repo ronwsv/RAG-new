@@ -302,7 +302,8 @@ def index_documents(files, embeddings_choice: str = None) -> str:
             failed_files.append(f"{file_name} ({str(e)[:50]})")
 
     # Monta relatório
-    report = [f"📂 **Contexto:** {context_name}\n"]
+    report = [f"📂 **Contexto:** {context_name}"]
+    report.append(f"🔧 **Modelo de Embeddings:** {state.embeddings.model} ({state.embeddings.provider.upper()})\\n")
 
     if successful_files:
         report.append(f"✅ {len(successful_files)} arquivo(s) indexado(s):")

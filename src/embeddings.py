@@ -40,9 +40,13 @@ class EmbeddingsManager:
             )
         elif provider == "ollama":
             # Ollama local - não precisa de API key
+            # Parâmetros otimizados para BGE-M3 em retrieval
             self._embeddings = OllamaEmbeddings(
                 model=model,
                 base_url=base_url or "http://localhost:11434",
+                # Otimizações específicas para retrieval com BGE-M3
+                num_ctx=8192,  # Contexto maior para chunks longos
+                # mirostat=2 melhora qualidade dos embeddings
             )
         else:
             raise ValueError(f"Provedor não suportado: {provider}")
@@ -111,4 +115,16 @@ class EmbeddingsManager:
         return {
             "provider": self.provider,
             "model": self.model,
+            "dimensions": self.get_dimensions(),
         }
+    
+    def get_dimensions(self) -> int:
+        """
+        Retorna o número de dimensões dos embeddings.
+        
+        Returns:
+            Número de dimensões do vetor de embedding
+        """
+        # Gera um embedding de teste para descobrir dimensões
+        test_embedding = self.embed_query("test")
+        return len(test_embedding)

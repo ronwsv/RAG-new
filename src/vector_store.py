@@ -191,10 +191,18 @@ class VectorStore:
 
     def _save_metadata(self, path: str) -> None:
         """Salva metadados do índice em arquivo JSON."""
+        # Tenta obter informações do modelo de embeddings
+        embedding_info = {}
+        if hasattr(self._embeddings, 'model'):
+            embedding_info['model'] = self._embeddings.model
+        if hasattr(self._embeddings, '__class__'):
+            embedding_info['provider'] = self._embeddings.__class__.__name__
+        
         metadata = {
             "indexed_files": self._indexed_files,
             "indexed_at": self._indexed_at,
             "total_files": len(self._indexed_files),
+            "embedding_model": embedding_info,  # Salva info do modelo
         }
         metadata_path = Path(path) / self.METADATA_FILE
         with open(metadata_path, "w", encoding="utf-8") as f:
