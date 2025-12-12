@@ -21,8 +21,16 @@ temperature = 0.3
 max_tokens = 4096
 
 [embeddings]
-provider = "openai"
-model = "text-embedding-3-small"
+# Provedores disponíveis: "openai", "ollama"
+provider = "ollama"
+model = "bge-m3"
+# Ollama base URL - use host.docker.internal quando rodar no Docker
+# Para uso local (sem Docker), use http://localhost:11434
+base_url = "http://host.docker.internal:11434"
+
+# Configuração alternativa para OpenAI (comente as linhas acima e descomente abaixo)
+# provider = "openai"
+# model = "text-embedding-3-small"
 
 [paths]
 documents_dir = "data/documents"

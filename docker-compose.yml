@@ -16,6 +16,9 @@ services:
       # Acesso a drives externos (descomente e ajuste conforme necessário)
       # - G:/:/mnt/g:ro
       # - //servidor/pasta:/mnt/rede:ro
+    # Conectar ao Ollama do host Windows
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7860"]

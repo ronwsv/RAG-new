@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import toml
 from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_core.embeddings import Embeddings
 
 
@@ -16,25 +17,32 @@ class EmbeddingsManager:
         provider: str = "openai",
         model: str = "text-embedding-3-small",
         api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
     ):
         """
         Inicializa o gerenciador de embeddings.
 
         Args:
-            provider: Provedor de embeddings ("openai")
+            provider: Provedor de embeddings ("openai", "ollama")
             model: Nome do modelo de embeddings
             api_key: API key (opcional, usa variável de ambiente se não fornecida)
+            base_url: Base URL para Ollama (opcional, padrão: http://localhost:11434)
         """
         self.provider = provider
         self.model = model
 
-        # Usa API key fornecida ou busca do ambiente
-        resolved_key = api_key or os.getenv("OPENAI_API_KEY")
-
         if provider == "openai":
+            # Usa API key fornecida ou busca do ambiente
+            resolved_key = api_key or os.getenv("OPENAI_API_KEY")
             self._embeddings = OpenAIEmbeddings(
                 model=model,
                 api_key=resolved_key,
+            )
+        elif provider == "ollama":
+            # Ollama local - não precisa de API key
+            self._embeddings = OllamaEmbeddings(
+                model=model,
+                base_url=base_url or "http://localhost:11434",
             )
         else:
             raise ValueError(f"Provedor não suportado: {provider}")
@@ -56,6 +64,7 @@ class EmbeddingsManager:
         return cls(
             provider=embeddings_config.get("provider", "openai"),
             model=embeddings_config.get("model", "text-embedding-3-small"),
+            base_url=embeddings_config.get("base_url"),
         )
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
