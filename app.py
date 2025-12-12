@@ -526,18 +526,6 @@ with gr.Blocks(
             gr.Markdown("### 📄 Indexação")
 
             current_context_label = gr.Markdown(get_current_context_label())
-
-            embeddings_choice = gr.Radio(
-                choices=["Ollama BGE-M3 (Local)", "OpenAI text-embedding-3-small"],
-                value="Ollama BGE-M3 (Local)",
-                label="Modelo de Embeddings",
-            )
-            
-            embeddings_choice = gr.Radio(
-                choices=["Ollama BGE-M3 (Local)", "OpenAI text-embedding-3-small"],
-                value="Ollama BGE-M3 (Local)",
-                label="Modelo de Embeddings",
-            )
             
             with gr.Tab("Upload"):
                 file_input = gr.File(
@@ -569,11 +557,19 @@ with gr.Blocks(
 
             query_context_label = gr.Markdown(get_current_context_label())
 
-            llm_choice = gr.Radio(
-                choices=["GPT-4o (OpenAI)", "Claude Sonnet (Anthropic)"],
-                value="GPT-4o (OpenAI)",
-                label="Modelo LLM",
-            )
+            with gr.Row():
+                llm_choice = gr.Radio(
+                    choices=["GPT-4o (OpenAI)", "Claude Sonnet (Anthropic)"],
+                    value="GPT-4o (OpenAI)",
+                    label="Modelo LLM",
+                    scale=1,
+                )
+                embeddings_choice = gr.Radio(
+                    choices=["Ollama BGE-M3 (Local)", "OpenAI text-embedding-3-small"],
+                    value="Ollama BGE-M3 (Local)",
+                    label="Modelo de Embeddings",
+                    scale=1,
+                )
 
             question_input = gr.Textbox(
                 label="Sua pergunta",
