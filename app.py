@@ -564,11 +564,12 @@ with gr.Blocks(
                     label="Modelo LLM",
                     scale=1,
                 )
-                embeddings_choice = gr.Radio(
-                    choices=["Ollama BGE-M3 (Local)", "OpenAI text-embedding-3-small"],
-                    value="Ollama BGE-M3 (Local)",
+                embeddings_choice = gr.Dropdown(
+                    choices=["Ollama BGE-M3 (Local - Grátis)", "OpenAI text-embedding-3-small (Pago)"],
+                    value="Ollama BGE-M3 (Local - Grátis)",
                     label="Modelo de Embeddings",
                     scale=1,
+                    interactive=True,
                 )
 
             question_input = gr.Textbox(
