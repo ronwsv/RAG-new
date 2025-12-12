@@ -48,12 +48,13 @@ class EmbeddingsManager:
             raise ValueError(f"Provedor não suportado: {provider}")
 
     @classmethod
-    def from_config(cls, config_path: str = "config.toml") -> "EmbeddingsManager":
+    def from_config(cls, config_path: str = "config.toml", override_provider: Optional[str] = None) -> "EmbeddingsManager":
         """
         Cria EmbeddingsManager a partir de arquivo de configuração TOML.
 
         Args:
             config_path: Caminho para o arquivo config.toml
+            override_provider: Substitui o provider do config.toml ("openai" ou "ollama")
 
         Returns:
             Instância configurada do EmbeddingsManager
@@ -61,9 +62,18 @@ class EmbeddingsManager:
         config = toml.load(config_path)
         embeddings_config = config.get("embeddings", {})
 
+        # Usa override se fornecido, senão usa do config
+        provider = override_provider or embeddings_config.get("provider", "openai")
+        
+        # Ajusta modelo baseado no provider
+        if provider == "ollama":
+            model = embeddings_config.get("model", "bge-m3")
+        else:
+            model = embeddings_config.get("model", "text-embedding-3-small")
+
         return cls(
-            provider=embeddings_config.get("provider", "openai"),
-            model=embeddings_config.get("model", "text-embedding-3-small"),
+            provider=provider,
+            model=model,
             base_url=embeddings_config.get("base_url"),
         )
 

@@ -29,6 +29,7 @@ class AppState:
         self.indexed_files: List[str] = []
         self.current_context: str = "default"
         self.context_manager = ContextManager()
+        self.current_embeddings_provider: str = "ollama"  # ollama ou openai
 
 
 state = AppState()
@@ -214,6 +215,16 @@ def _process_single_file_in_context(docs: list, file_name: str, context_name: st
             embeddings=state.embeddings.embeddings,
             context_name=context_name,
         )
+    
+    # Verifica se mudou o provider de embeddings
+    current_provider = state.embeddings.provider
+    if state.current_embeddings_provider != current_provider:
+        # Recria vector store com novo provider
+        state.vector_store = VectorStore(
+            embeddings=state.embeddings.embeddings,
+            context_name=context_name,
+        )
+        state.current_embeddings_provider = current_provider
 
     # Verifica se índice existe
     if not state.vector_store.is_initialized and state.context_manager.has_index(context_name):
@@ -251,10 +262,19 @@ def _process_single_file_in_context(docs: list, file_name: str, context_name: st
     state.indexed_files = all_files
 
 
-def index_documents(files) -> str:
+def index_documents(files, embeddings_choice: str = "Ollama BGE-M3 (Local)") -> str:
     """Indexa documentos no contexto atual."""
     if not files:
         return "❌ Nenhum arquivo selecionado."
+
+    # Atualiza provider de embeddings
+    provider = "ollama" if "Ollama" in embeddings_choice else "openai"
+    if provider != state.embeddings.provider:
+        state.embeddings = EmbeddingsManager.from_config("config.toml", override_provider=provider)
+        state.current_embeddings_provider = provider
+        # Reseta vector store para usar novo provider
+        state.vector_store = None
+        state.rag_chain = None
 
     context_name = state.current_context
     successful_files = []
@@ -303,10 +323,19 @@ def index_documents(files) -> str:
     return "\n".join(report)
 
 
-def index_directory(folder_path: str, recursive: bool = True) -> str:
+def index_directory(folder_path: str, recursive: bool = True, embeddings_choice: str = "Ollama BGE-M3 (Local)") -> str:
     """Indexa todos os documentos de uma pasta no contexto atual."""
     if not folder_path or not folder_path.strip():
         return "❌ Por favor, informe o caminho da pasta."
+    
+    # Atualiza provider de embeddings
+    provider = "ollama" if "Ollama" in embeddings_choice else "openai"
+    if provider != state.embeddings.provider:
+        state.embeddings = EmbeddingsManager.from_config("config.toml", override_provider=provider)
+        state.current_embeddings_provider = provider
+        # Reseta vector store para usar novo provider
+        state.vector_store = None
+        state.rag_chain = None
 
     folder_path = folder_path.strip()
     context_name = state.current_context
@@ -498,6 +527,18 @@ with gr.Blocks(
 
             current_context_label = gr.Markdown(get_current_context_label())
 
+            embeddings_choice = gr.Radio(
+                choices=["Ollama BGE-M3 (Local)", "OpenAI text-embedding-3-small"],
+                value="Ollama BGE-M3 (Local)",
+                label="Modelo de Embeddings",
+            )
+            
+            embeddings_choice = gr.Radio(
+                choices=["Ollama BGE-M3 (Local)", "OpenAI text-embedding-3-small"],
+                value="Ollama BGE-M3 (Local)",
+                label="Modelo de Embeddings",
+            )
+            
             with gr.Tab("Upload"):
                 file_input = gr.File(
                     label="Selecione documentos",
@@ -617,13 +658,13 @@ with gr.Blocks(
     # Indexação
     index_btn.click(
         fn=index_documents,
-        inputs=[file_input],
+        inputs=[file_input, embeddings_choice],
         outputs=[index_output],
     )
 
     index_folder_btn.click(
         fn=index_directory,
-        inputs=[folder_input, recursive_check],
+        inputs=[folder_input, recursive_check, embeddings_choice],
         outputs=[index_output],
     )
 
